@@ -8,7 +8,10 @@ import com.fitness.activityservice.exception.InvalidUserException;
 import com.fitness.activityservice.model.Activity;
 import com.fitness.activityservice.repository.ActivityRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -17,13 +20,32 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ActivityService {
     private final ActivityRepository activityRepository;
     private final WebClient userWebClient;
+    private final RabbitTemplate rabbitTemplate;
+
+    @Value("${rabbitmq.exchange.name}")
+    private String exchange;
+
+    @Value("${rabbitmq.routing.key}")
+    private String routingKey;
 
     public ActivityResponse createActivity(ActivityRequest activityRequest){
+        if(!validateUser(activityRequest.getUserId())){
+            throw new InvalidUserException("user with Id "+activityRequest.getUserId()+" is Invalid ");
+        }
         Activity activity=requestMapper(activityRequest);
-        return responseMapper(activityRepository.save(activity));
+        Activity savedActivity=activityRepository.save(activity);
+
+        //send the activity into queue
+        try{
+         rabbitTemplate.convertAndSend(exchange,routingKey,savedActivity);
+        } catch (Exception e) {
+            log.info("failed to send activity into queue");
+        }
+        return responseMapper(savedActivity);
     }
 
     public ActivityResponse getActivity(String activityId){
@@ -45,9 +67,7 @@ public class ActivityService {
 
 
     public Activity requestMapper(ActivityRequest activityRequest){
-        if(!validateUser(activityRequest.getUserId())){
-            throw new InvalidUserException("user with Id "+activityRequest.getUserId()+" is Invalid ");
-        }
+
         Activity activity=Activity.builder()
                 .type(activityRequest.getType())
                 .additionalMetrics(activityRequest.getAdditionalMetrics())
