@@ -27,6 +27,10 @@ public class UserController {
         return new ResponseEntity<>(userService.registerUser(userRequest),HttpStatus.CREATED);
     }
 
+    @GetMapping("/{userId}/validate")
+    public Boolean checkUserExists(@PathVariable  String userId){
+        return userService.checkUserExists(userId);
+    }
 
 
 

@@ -29,6 +29,10 @@ public class UserService {
 
     }
 
+    public Boolean checkUserExists(String userId){
+        return userRepository.existsById(userId);
+    }
+
     public UserResponse responseMapper(User user){
         UserResponse userResponse=new UserResponse();
         userResponse.setFirstName(user.getFirstName());

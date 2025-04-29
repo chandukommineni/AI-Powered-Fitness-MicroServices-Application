@@ -4,18 +4,22 @@ package com.fitness.activityservice.service;
 import com.fitness.activityservice.dto.ActivityRequest;
 import com.fitness.activityservice.dto.ActivityResponse;
 import com.fitness.activityservice.exception.ActivityNotFoundException;
+import com.fitness.activityservice.exception.InvalidUserException;
 import com.fitness.activityservice.model.Activity;
 import com.fitness.activityservice.repository.ActivityRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ActivityService {
-    private ActivityRepository activityRepository;
+    private final ActivityRepository activityRepository;
+    private final WebClient userWebClient;
 
     public ActivityResponse createActivity(ActivityRequest activityRequest){
         Activity activity=requestMapper(activityRequest);
@@ -41,6 +45,9 @@ public class ActivityService {
 
 
     public Activity requestMapper(ActivityRequest activityRequest){
+        if(!validateUser(activityRequest.getUserId())){
+            throw new InvalidUserException("user with Id "+activityRequest.getUserId()+" is Invalid ");
+        }
         Activity activity=Activity.builder()
                 .type(activityRequest.getType())
                 .additionalMetrics(activityRequest.getAdditionalMetrics())
@@ -66,6 +73,18 @@ public class ActivityService {
                 .build();
         return activityResponse;
     }
+
+    public Boolean validateUser(String userId){
+        boolean isValid =userWebClient
+                .get()
+                .uri("/api/users/{userId}/validate",userId)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
+        return isValid;
+
+    }
+
 
 
 

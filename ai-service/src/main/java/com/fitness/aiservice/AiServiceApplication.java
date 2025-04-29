@@ -1,14 +1,13 @@
-package com.fitness.userservice;
+package com.fitness.aiservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-
-public class UserServiceApplication {
+public class AiServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(UserServiceApplication.class, args);
+		SpringApplication.run(AiServiceApplication.class, args);
 	}
 
 }

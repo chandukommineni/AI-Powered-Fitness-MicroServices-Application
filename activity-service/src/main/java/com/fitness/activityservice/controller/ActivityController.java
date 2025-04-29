@@ -4,7 +4,8 @@ import com.fitness.activityservice.dto.ActivityRequest;
 import com.fitness.activityservice.dto.ActivityResponse;
 import com.fitness.activityservice.model.Activity;
 import com.fitness.activityservice.service.ActivityService;
-import lombok.AllArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +14,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/activities")
-@AllArgsConstructor
-public class ActivityController {
 
+public class ActivityController {
+   @Autowired
     private ActivityService activityService;
 
     @GetMapping("/{activityId}")
