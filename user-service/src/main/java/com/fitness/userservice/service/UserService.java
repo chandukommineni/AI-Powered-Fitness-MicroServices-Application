@@ -22,15 +22,16 @@ public class UserService {
 
     public UserResponse registerUser(UserRequest userRequest) {
         if(userRepository.existsByEmail(userRequest.getEmail())){
-            throw new UserAlreadyExistsException("User with Email "+userRequest.getEmail()+" is already exists ");
+            User existingUser=userRepository.findByEmail(userRequest.getEmail());
+           return responseMapper(existingUser);
         }
         User user=userRepository.save(requestMapper(userRequest));
         return responseMapper(user);
 
     }
 
-    public Boolean checkUserExists(String userId){
-        return userRepository.existsById(userId);
+    public Boolean checkUserExists(String keycloakId){
+        return userRepository.existsByKeycloakId(keycloakId);
     }
 
     public UserResponse responseMapper(User user){
@@ -43,11 +44,13 @@ public class UserService {
         userResponse.setPassword(user.getPassword());
         userResponse.setCreatedAt(user.getCreatedAt());
         userResponse.setUpdatedAt(user.getUpdatedAt());
+        userResponse.setKeycloakId(user.getKeycloakId());
         return userResponse;
     }
 
     public User requestMapper(UserRequest userRequest){
         User user=new User();
+        user.setKeycloakId(userRequest.getKeycloakId());
         user.setEmail(userRequest.getEmail());
         user.setFirstName(userRequest.getFirstName());
         user.setLastName(userRequest.getLastName());
