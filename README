@@ -1,0 +1,8 @@
+Make Sure to Run your RabbitMQ and KeyCloak on your Docker Acccount
+RabbitMQ port numbers are 5672
+keyCloak port number is 8181
+database used:
+    activity:mongodb
+    airecommendation:mongodb
+    users:mysql
+Make sure to provide gemini api credentials as environment varibales in ai service
